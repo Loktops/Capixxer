@@ -1,0 +1,552 @@
+{% load static %}
+<style>
+    .vertical-navbar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        width: 280px;
+        background: #111827;
+        padding: 0;
+        box-shadow: 4px 0 25px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+    }
+
+    .vertical-navbar.collapsed {
+        transform: translateX(-280px);
+    }
+
+    .nav-brand {
+        padding: 2rem;
+        text-align: center;
+        background: #1f2937;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .nav-brand::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #4b5563, transparent);
+        opacity: 0.5;
+    }
+
+    .logo-container {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 1rem;
+        background: #374151;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .logo-container:hover {
+        transform: scale(1.05) rotate(5deg);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo-container::before {
+        content: 'C';
+        color: #9ca3af;
+        font-size: 2rem;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .logo-container:hover::before {
+        color: #f3f4f6;
+        transform: scale(1.1);
+    }
+
+    .logo-container::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(45deg, transparent, rgba(156, 163, 175, 0.1));
+        transition: all 0.3s ease;
+    }
+
+    .logo-container:hover::after {
+        background: linear-gradient(45deg, transparent, rgba(243, 244, 246, 0.2));
+    }
+
+    .nav-brand h2 {
+        color: #f3f4f6;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .nav-brand:hover h2 {
+        transform: translateY(-2px);
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-menu {
+        list-style: none;
+        padding: 1.5rem 0;
+        margin: 0;
+    }
+
+    .nav-item {
+        padding: 0 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        color: #9ca3af;
+        text-decoration: none;
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .nav-link::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 3px;
+        height: 100%;
+        background: #4b5563;
+        transform: scaleY(0);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nav-link:hover {
+        background: #1f2937;
+        color: #f3f4f6;
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .nav-link:hover::before {
+        transform: scaleY(1);
+    }
+
+    .nav-link.active {
+        background: #1f2937;
+        color: #f3f4f6;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .nav-link.active::before {
+        transform: scaleY(1);
+        background: #f3f4f6;
+    }
+
+    .nav-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 12px;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        transition: all 0.3s ease;
+    }
+
+    .nav-link:hover .nav-icon {
+        transform: scale(1.1) rotate(5deg);
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    }
+
+    .nav-text {
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .nav-link:hover .nav-text {
+        transform: translateX(5px);
+    }
+
+    .nav-badge {
+        margin-left: auto;
+        background: #4b5563;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        color: #f3f4f6;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .nav-link:hover .nav-badge {
+        transform: scale(1.1);
+        background: #6b7280;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-footer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 1.5rem;
+        text-align: center;
+        background: #1f2937;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-footer small {
+        color: #9ca3af;
+        font-size: 0.85rem;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .nav-footer:hover small {
+        color: #f3f4f6;
+        transform: translateY(-2px);
+    }
+
+    #nav-toggle {
+        position: absolute;
+        right: -32px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 32px;
+        height: 50px;
+        background: #111827;
+        border: none;
+        border-radius: 0 8px 8px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #f3f4f6;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #nav-toggle:hover {
+        background: #1f2937;
+        transform: translateY(-50%) scale(1.05);
+        box-shadow: 8px 0 25px rgba(0, 0, 0, 0.3);
+    }
+
+    #nav-toggle svg {
+        width: 18px;
+        height: 18px;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    .vertical-navbar.collapsed #nav-toggle svg {
+        transform: rotate(180deg);
+    }
+
+    /* Ajuste do conteúdo principal */
+    .main-content {
+        margin-left: 280px;
+        width: calc(100% - 280px);
+        min-height: 100vh;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        left: 0;
+        overflow-x: hidden;
+    }
+
+    .main-content.expanded {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    /* Ajuste do dashboard */
+    .dashboard {
+        position: fixed;
+        top: 0;
+        left: 280px;
+        right: 0;
+        bottom: 0;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        width: calc(100% - 280px);
+    }
+
+    .main-content.expanded .dashboard {
+        left: 0;
+        width: 100%;
+    }
+
+    /* Responsividade */
+    @media (max-width: 992px) {
+        .vertical-navbar {
+            transform: translateX(-280px);
+        }
+        
+        .vertical-navbar.mobile-visible {
+            transform: translateX(0);
+        }
+
+        .main-content {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .dashboard {
+            left: 0;
+            width: 100%;
+        }
+
+        #nav-toggle {
+            left: 20px;
+            background: #1f2937;
+        }
+
+        .nav-text, .nav-badge {
+            display: none;
+        }
+
+        .nav-brand {
+            margin-bottom: 2.5rem;
+        }
+
+        .nav-brand h2 {
+            display: none;
+        }
+
+        .logo-container {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 0;
+        }
+
+        .logo-container::before {
+            font-size: 1.5rem;
+        }
+
+        .nav-link {
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .nav-icon {
+            margin-right: 0;
+        }
+
+        .nav-footer {
+            padding: 1rem;
+        }
+
+        .nav-footer small {
+            display: none;
+        }
+    }
+</style>
+
+<div class="nav-wrapper">
+    <nav class="vertical-navbar">
+        <div class="nav-brand">
+            <div class="logo-container"></div>
+            <h2>Capixxer</h2>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                    </svg>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/>
+                    </svg>
+                    <span class="nav-text">Relatórios</span>
+                    <span class="nav-badge">Novo</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/comparativo/" class="nav-link {% if request.resolver_match.url_name == 'comparativo' %}active{% endif %}">
+                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+                    </svg>
+                    <span class="nav-text">Comparativo</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                    <span class="nav-text">Informações</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+                    </svg>
+                    <span class="nav-text">Configurações</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="nav-footer">
+            <small>© 2025 Capixxer</small>
+        </div>
+
+        <button id="nav-toggle" onclick="toggleNav()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+            </svg>
+        </button>
+    </nav>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const navbar = document.querySelector('.vertical-navbar');
+    const toggleBtn = document.getElementById('nav-toggle');
+    const mainContent = document.querySelector('.main-content');
+    const dashboard = document.querySelector('.dashboard');
+    let isExpanded = false;
+
+    // Função para animar a navbar
+    function animateNavbar() {
+        navbar.classList.toggle('collapsed');
+        mainContent.classList.toggle('expanded');
+        isExpanded = !isExpanded;
+        
+        // Anima o ícone do botão
+        const icon = toggleBtn.querySelector('svg');
+        icon.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0)';
+        
+        // Adiciona efeito de fade nos itens do menu
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach((item, index) => {
+            setTimeout(() => {
+                item.style.opacity = isExpanded ? '0' : '1';
+                item.style.transform = isExpanded ? 'translateX(-20px)' : 'translateX(0)';
+            }, index * 50);
+        });
+    }
+
+    // Evento de clique no botão de toggle
+    toggleBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        animateNavbar();
+    });
+
+    // Adiciona efeito hover nos links
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(5px)';
+            const icon = this.querySelector('.nav-icon');
+            if (icon) {
+                icon.style.transform = 'scale(1.1) rotate(5deg)';
+            }
+        });
+
+        link.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0)';
+            const icon = this.querySelector('.nav-icon');
+            if (icon) {
+                icon.style.transform = 'scale(1) rotate(0)';
+            }
+        });
+    });
+
+    // Adiciona efeito de scroll suave
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Adiciona efeito de hover no logo
+    const logoContainer = document.querySelector('.logo-container');
+    if (logoContainer) {
+        logoContainer.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.05) rotate(5deg)';
+        });
+
+        logoContainer.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1) rotate(0)';
+        });
+    }
+
+    // Adiciona efeito de hover no footer
+    const navFooter = document.querySelector('.nav-footer');
+    if (navFooter) {
+        navFooter.addEventListener('mouseenter', function() {
+            const small = this.querySelector('small');
+            if (small) {
+                small.style.transform = 'translateY(-2px)';
+                small.style.color = '#f3f4f6';
+            }
+        });
+
+        navFooter.addEventListener('mouseleave', function() {
+            const small = this.querySelector('small');
+            if (small) {
+                small.style.transform = 'translateY(0)';
+                small.style.color = '#9ca3af';
+            }
+        });
+    }
+
+    // Adiciona efeito de hover nos badges
+    const navBadges = document.querySelectorAll('.nav-badge');
+    navBadges.forEach(badge => {
+        badge.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.1)';
+            this.style.background = '#6b7280';
+        });
+
+        badge.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+            this.style.background = '#4b5563';
+        });
+    });
+
+    // Responsividade para dispositivos móveis
+    function handleResponsive() {
+        if (window.innerWidth <= 992) {
+            navbar.classList.add('collapsed');
+            mainContent.classList.add('expanded');
+            isExpanded = true;
+        } else {
+            navbar.classList.remove('collapsed');
+            mainContent.classList.remove('expanded');
+            isExpanded = false;
+        }
+    }
+
+    // Inicializa o estado responsivo
+    handleResponsive();
+
+    // Atualiza o estado responsivo quando a janela é redimensionada
+    window.addEventListener('resize', handleResponsive);
+});
+</script>

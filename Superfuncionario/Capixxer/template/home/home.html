@@ -1,0 +1,635 @@
+{% extends 'base.html' %}
+
+{% load mathfilters %}
+
+{% block style %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    :root {
+        --primary-color: #111827;
+        --secondary-color: #4b5563;
+        --success-color: #10B981;
+        --warning-color: #F59E0B;
+        --danger-color: #EF4444;
+        --info-color: #3B82F6;
+        --background-color: #0f172a;
+        --card-background: #1e293b;
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --gradient-success: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        --gradient-warning: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+        --gradient-danger: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+        --gradient-info: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    }
+
+    html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: var(--background-color);
+        color: var(--text-primary);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .dashboard {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--background-color);
+        padding: 2rem;
+        overflow-y: auto;
+        transition: all 0.3s ease;
+        z-index: 1;
+        width: 100%;
+    }
+
+    body.navbar-expanded .dashboard {
+        left: 250px;
+        width: calc(100% - 250px);
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        background: var(--card-background);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--border-color);
+    }
+
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .month-selector {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        backdrop-filter: blur(10px);
+    }
+
+    .month-selector select {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 0.75rem 1.25rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .action-button {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .action-button:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .store-card {
+        background: var(--card-background);
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .store-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .store-header {
+        padding: 2rem;
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .store-name {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #94a3b8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .store-address {
+        color: var(--text-secondary);
+        font-size: 1rem;
+    }
+
+    .store-content {
+        padding: 2rem;
+    }
+
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 1.5rem;
+        padding: 2rem;
+    }
+
+    .metric-card {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .metric-title {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #94a3b8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .metric-percentage {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-size: 1rem;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .metric-percentage.positive {
+        background: var(--gradient-success);
+        color: white;
+    }
+
+    .metric-percentage.negative {
+        background: var(--gradient-danger);
+        color: white;
+    }
+
+    .metric-percentage.neutral {
+        background: var(--gradient-warning);
+        color: white;
+    }
+
+    .chart-container {
+        background: var(--card-background);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+        height: 350px;
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    .chart-wrapper {
+        position: absolute;
+        top: 55%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80%;
+        height: 80%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .chart-wrapper canvas {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    .chart-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        color: var(--text-primary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .data-table {
+        margin: 2rem;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        overflow-x: auto;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table thead th {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 1.5rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        color: var(--text-primary);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .table tbody td {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 1rem;
+        color: var(--text-primary);
+    }
+
+    .table tbody tr:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    @media (max-width: 1200px) {
+        .metrics-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        
+        .charts-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .chart-container {
+            height: 300px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .metrics-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .dashboard-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .chart-container {
+            height: 350px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="dashboard">
+        <div class="dashboard-header">
+            <h1>Dashboard Capixxer</h1>
+            <div class="dashboard-actions">
+                <div class="month-selector">
+                    <label for="month-select">Mês:</label>
+                    <select id="month-select" onchange="updateDashboard(this.value)">
+                        <option value="2025-03" selected>Março 2025</option>
+                    </select>
+                </div>
+                <button class="action-button">Exportar Dados</button>
+                <button class="action-button">Gerar Relatório</button>
+            </div>
+        </div>
+
+        <div class="store-cards">
+            {% for dados_loja in dados_lojas_lista %}
+            <div class="store-card">
+                <div class="store-header">
+                    <h2 class="store-name">{{ dados_loja.loja.nome }}</h2>
+                    <p class="store-address">{{ dados_loja.loja.endereco }}</p>
+                </div>
+                <div class="store-content">
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <h4 class="metric-title">Total de Produtos</h4>
+                            <p class="metric-value">{{ dados_loja.total_produtos }}</p>
+                        </div>
+
+                        <div class="metric-card">
+                            <h4 class="metric-title">Produtos Respondidos</h4>
+                            <p class="metric-value">{{ dados_loja.produtos_respondidos }}</p>
+                            <span class="metric-percentage positive">
+                                {% widthratio dados_loja.produtos_respondidos dados_loja.total_produtos 100 %}%
+                            </span>
+                        </div>
+
+                        <div class="metric-card">
+                            <h4 class="metric-title">Produtos na Gôndola</h4>
+                            <p class="metric-value">{{ dados_loja.produtos_gondola }}</p>
+                            <span class="metric-percentage positive">
+                                {% widthratio dados_loja.produtos_gondola dados_loja.produtos_respondidos 100 %}%
+                            </span>
+                        </div>
+
+                        <div class="metric-card">
+                            <h4 class="metric-title">Produtos Presentes</h4>
+                            <p class="metric-value">{{ dados_loja.produtos_presente }}</p>
+                            <span class="metric-percentage positive">
+                                {% widthratio dados_loja.produtos_presente dados_loja.produtos_gondola 100 %}%
+                            </span>
+                        </div>
+
+                        <div class="metric-card">
+                            <h4 class="metric-title">Produtos Não Respondidos</h4>
+                            <p class="metric-value">{{ dados_loja.produtos_nao_respondidos }}</p>
+                            <span class="metric-percentage negative">
+                                {% widthratio dados_loja.produtos_nao_respondidos dados_loja.total_produtos 100 %}%
+                            </span>
+                        </div>
+
+                        <div class="metric-card">
+                            <h4 class="metric-title">Produtos em Ruptura</h4>
+                            <p class="metric-value">{{ dados_loja.produtos_ruptura }}</p>
+                            <span class="metric-percentage negative">
+                                {% widthratio dados_loja.produtos_ruptura dados_loja.produtos_respondidos 100 %}%
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <h4 class="chart-title">Status de Respostas</h4>
+                            <div class="chart-wrapper">
+                                <canvas id="respostasChart{{ forloop.counter }}"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <h4 class="chart-title">Status da Gôndola</h4>
+                            <div class="chart-wrapper">
+                                <canvas id="gondolaChart{{ forloop.counter }}"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <h4 class="chart-title">Status de Presença</h4>
+                            <div class="chart-wrapper">
+                                <canvas id="presencaChart{{ forloop.counter }}"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <h4 class="chart-title">Status de Reposição</h4>
+                            <div class="chart-wrapper">
+                                <canvas id="reposicaoChart{{ forloop.counter }}"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="data-table">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Total</th>
+                                        <th>Respondidos</th>
+                                        <th>Não Respondidos</th>
+                                        <th>Na Gôndola</th>
+                                        <th>Ruptura</th>
+                                        <th>Presente</th>
+                                        <th>Presente e Reposto</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for dado in dados_loja.dados %}
+                                    <tr>
+                                        <td>{{ dado.data|date:"d/m/Y" }}</td>
+                                        <td>{{ dado.total_produtos }}</td>
+                                        <td>{{ dado.produtos_respondidos }}</td>
+                                        <td>{{ dado.produtos_nao_respondidos }}</td>
+                                        <td>{{ dado.produtos_gondola }}</td>
+                                        <td>{{ dado.produtos_ruptura }}</td>
+                                        <td>{{ dado.produtos_presente }}</td>
+                                        <td>{{ dado.produtos_presente_reposto }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+<script>
+    function updateDashboard(month) {
+        // Aqui você pode adicionar a lógica para atualizar os dados do dashboard
+        // com base no mês selecionado
+        console.log('Mês selecionado:', month);
+        // Você pode fazer uma requisição AJAX para buscar os dados do mês selecionado
+        // e atualizar os gráficos e métricas
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        font: {
+                            size: 14,
+                            family: "'Inter', sans-serif",
+                            weight: '600'
+                        },
+                        color: '#f8fafc',
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                    titleColor: '#f8fafc',
+                    titleFont: {
+                        size: 16,
+                        weight: '600',
+                        family: "'Inter', sans-serif"
+                    },
+                    bodyColor: '#f8fafc',
+                    bodyFont: {
+                        size: 14,
+                        family: "'Inter', sans-serif"
+                    },
+                    padding: 12,
+                    boxPadding: 8,
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.parsed.toFixed(2) + '%';
+                        }
+                    }
+                }
+            },
+            animation: {
+                animateScale: true,
+                animateRotate: true,
+                duration: 1500,
+                easing: 'easeInOutQuart'
+            }
+        };
+
+        function createChart(elementId, data, labels, colors) {
+            const ctx = document.getElementById(elementId);
+            if (ctx) {
+                if (window.myCharts && window.myCharts[elementId]) {
+                    window.myCharts[elementId].destroy();
+                }
+
+                const chart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: colors,
+                            borderWidth: 2,
+                            borderColor: 'rgba(30, 41, 59, 0.5)',
+                            hoverOffset: 8
+                        }]
+                    },
+                    options: commonOptions
+                });
+                
+                window.myCharts = window.myCharts || {};
+                window.myCharts[elementId] = chart;
+            }
+        }
+
+        function initializeCharts() {
+            {% for dados_loja in dados_lojas_lista %}
+            // Gráfico de Respostas
+            createChart(
+                'respostasChart{{ forloop.counter }}',
+                [
+                    {{ dados_loja.produtos_respondidos }},
+                    {{ dados_loja.produtos_nao_respondidos }}
+                ],
+                ['Respondidas', 'Não respondido'],
+                ['#10B981', '#EF4444']
+            );
+
+            // Gráfico de Gôndola
+            createChart(
+                'gondolaChart{{ forloop.counter }}',
+                [
+                    {{ dados_loja.produtos_gondola }},
+                    {{ dados_loja.produtos_ruptura }}
+                ],
+                ['Na Gôndola', 'Em Ruptura'],
+                ['#3B82F6', '#F59E0B']
+            );
+
+            // Gráfico de Presença
+            createChart(
+                'presencaChart{{ forloop.counter }}',
+                [
+                    {{ dados_loja.produtos_presente }},
+                    {{ dados_loja.produtos_gondola|sub:dados_loja.produtos_presente }}
+                ],
+                ['Presente', 'Ausente'],
+                ['#8B5CF6', '#EC4899']
+            );
+
+            // Gráfico de Reposição
+            createChart(
+                'reposicaoChart{{ forloop.counter }}',
+                [
+                    {{ dados_loja.produtos_presente_reposto }},
+                    {{ dados_loja.produtos_presente|sub:dados_loja.produtos_presente_reposto }}
+                ],
+                ['Presente e Reposto', 'Apenas Presente'],
+                ['#06B6D4', '#FCD34D']
+            );
+            {% endfor %}
+        }
+
+        initializeCharts();
+
+        window.addEventListener('resize', function() {
+            if (window.myCharts) {
+                Object.values(window.myCharts).forEach(chart => {
+                    if (chart) {
+                        chart.resize();
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}
