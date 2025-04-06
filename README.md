@@ -1,0 +1,2 @@
+# Capixxer
+Dashboards nodes
