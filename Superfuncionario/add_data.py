@@ -127,4 +127,82 @@ DadosLoja.objects.create(
     observacoes='Dados de março 2025'
 )
 
+# Criar a loja GV
+loja_gv, created = Loja.objects.get_or_create(
+    nome='Gv',
+    defaults={
+        'endereco': 'Endereço GV',
+        'telefone': '(00) 0000-0000',
+        'email': 'gv@example.com'
+    }
+)
+
+# Dados da GV (da imagem)
+dados_gv = {
+    'total_produtos': 1168,
+    'produtos_respondidos': 732,  # 62.7%
+    'produtos_nao_respondidos': 436,  # 37%
+    'produtos_gondola': 504,  # 68.9%
+    'produtos_ruptura': 228,  # 31.1%
+    'produtos_presente': 492,  # 97.6%
+    'produtos_presente_reposto': 12,  # 2%
+}
+
+# Criar registro para GV
+DadosLoja.objects.create(
+    loja=loja_gv,
+    data=datetime(2025, 3, 1),
+    vendas=0,
+    clientes=0,
+    ticket_medio=0,
+    meta=0,
+    total_produtos=dados_gv['total_produtos'],
+    produtos_respondidos=dados_gv['produtos_respondidos'],
+    produtos_nao_respondidos=dados_gv['produtos_nao_respondidos'],
+    produtos_gondola=dados_gv['produtos_gondola'],
+    produtos_ruptura=dados_gv['produtos_ruptura'],
+    produtos_presente=dados_gv['produtos_presente'],
+    produtos_presente_reposto=dados_gv['produtos_presente_reposto'],
+    observacoes='Dados de março 2025'
+)
+
+# Criar a loja Leblon
+loja_leblon, created = Loja.objects.get_or_create(
+    nome='Leblon',
+    defaults={
+        'endereco': 'Endereço Leblon',
+        'telefone': '(00) 0000-0000',
+        'email': 'leblon@example.com'
+    }
+)
+
+# Dados da Leblon (da imagem)
+dados_leblon = {
+    'total_produtos': 2156,
+    'produtos_respondidos': 1970,  # 91.4%
+    'produtos_nao_respondidos': 186,  # 8%
+    'produtos_gondola': 1747,  # 88.7%
+    'produtos_ruptura': 223,  # 11%
+    'produtos_presente': 1606,  # 91.9%
+    'produtos_presente_reposto': 141,  # 8%
+}
+
+# Criar registro para Leblon
+DadosLoja.objects.create(
+    loja=loja_leblon,
+    data=datetime(2025, 3, 1),
+    vendas=0,
+    clientes=0,
+    ticket_medio=0,
+    meta=0,
+    total_produtos=dados_leblon['total_produtos'],
+    produtos_respondidos=dados_leblon['produtos_respondidos'],
+    produtos_nao_respondidos=dados_leblon['produtos_nao_respondidos'],
+    produtos_gondola=dados_leblon['produtos_gondola'],
+    produtos_ruptura=dados_leblon['produtos_ruptura'],
+    produtos_presente=dados_leblon['produtos_presente'],
+    produtos_presente_reposto=dados_leblon['produtos_presente_reposto'],
+    observacoes='Dados de março 2025'
+)
+
 print('Dados inseridos com sucesso!') 

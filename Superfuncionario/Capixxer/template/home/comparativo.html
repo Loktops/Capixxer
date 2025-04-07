@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
+{% load mathfilters %}
 
 {% block style %}
 <style>
-    .comparativo-container {
-        max-width: 1400px;
+    .container {
+        max-width: 1200px;
         margin: 0 auto;
         padding: 2rem;
+        background: #0f172a;
+        min-height: 100vh;
     }
 
     .header {
@@ -13,580 +16,424 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 2rem;
-        background: var(--card-background);
-        padding: 2rem;
-        border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        border: 1px solid var(--border-color);
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border-radius: 1rem;
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .header h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin: 0;
+        color: #e2e8f0;
     }
 
     .month-selector {
         display: flex;
         align-items: center;
         gap: 1rem;
-        background: rgba(255, 255, 255, 0.05);
-        padding: 1rem 1.5rem;
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
-        backdrop-filter: blur(10px);
     }
 
-    .month-selector select {
-        background: rgba(255, 255, 255, 0.05);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-        padding: 0.75rem 1.25rem;
-        border-radius: 8px;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
+    .current-month {
+        font-size: 1.25rem;
+        font-weight: 500;
+        color: #94a3b8;
     }
 
     .metrics-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 2rem;
+        gap: 1.5rem;
         margin-bottom: 2rem;
     }
 
     .metric-card {
-        background: var(--card-background);
-        padding: 2rem;
-        border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        border: 1px solid var(--border-color);
-        transition: all 0.3s ease;
+        background: #1e293b;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .metric-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
     }
 
-    .metric-card h3 {
-        color: var(--text-primary);
-        margin-bottom: 1.5rem;
-        font-size: 1.5rem;
+    .metric-card h2 {
+        color: #e2e8f0;
+        font-size: 1.25rem;
         font-weight: 600;
-        background: linear-gradient(135deg, #f8fafc 0%, #94a3b8 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
     }
 
     .metric-list {
-        display: grid;
-        gap: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
     }
 
     .metric-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1rem 1.5rem;
-        background: rgba(255, 255, 255, 0.03);
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
+        padding: 1rem;
+        background: #0f172a;
+        border-radius: 0.75rem;
         transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .metric-item:hover {
+        background: #1e293b;
         transform: translateX(5px);
-        background: rgba(255, 255, 255, 0.05);
     }
 
-    .metric-item .store-name {
-        color: var(--text-primary);
+    .store-name {
         font-weight: 500;
-        font-size: 1.1rem;
+        color: #e2e8f0;
     }
 
-    .metric-item .metric-value {
-        font-size: 1.2rem;
+    .metric-details {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .metric-value {
+        font-size: 1.25rem;
         font-weight: 600;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.05);
+        min-width: 60px;
+        text-align: right;
     }
 
-    .analysis-section {
-        background: var(--card-background);
-        padding: 1.5rem;
-        border-radius: 16px;
-        margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        border: 1px solid var(--border-color);
+    .metric-value.presente {
+        color: #4ade80;
     }
 
-    .analysis-section h2 {
-        color: var(--text-primary);
-        margin-bottom: 1.5rem;
-        font-size: 1.5rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+    .metric-value.ruptura {
+        color: #f87171;
     }
 
-    .analysis-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1.5rem;
-    }
-
-    .analysis-card {
-        background: rgba(255, 255, 255, 0.03);
-        padding: 1.5rem;
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
-        height: 300px;
-        overflow-y: auto;
-    }
-
-    .analysis-card:hover {
-        transform: translateY(-5px);
-        background: rgba(255, 255, 255, 0.05);
-    }
-
-    .analysis-card h3 {
-        color: var(--text-primary);
-        margin-bottom: 1rem;
-        font-size: 1.2rem;
-        font-weight: 600;
-        background: linear-gradient(135deg, #f8fafc 0%, #94a3b8 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    .analysis-list {
-        display: grid;
-        gap: 0.75rem;
-    }
-
-    .analysis-item {
-        color: var(--text-secondary);
-        line-height: 1.4;
-        font-size: 0.95rem;
-        padding: 0.5rem;
-        border-left: 2px solid var(--border-color);
-        transition: all 0.3s ease;
-    }
-
-    .analysis-item:hover {
-        border-left-color: var(--info-color);
-        color: var(--text-primary);
-        padding-left: 0.75rem;
+    .metric-value.reposicao {
+        color: #60a5fa;
     }
 
     .chart-container {
-        background: var(--card-background);
+        background: #1e293b;
+        border-radius: 1rem;
         padding: 1.5rem;
-        border-radius: 16px;
-        margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        border: 1px solid var(--border-color);
+        margin-top: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .chart-container h2 {
-        color: var(--text-primary);
+        color: #e2e8f0;
+        font-size: 1.25rem;
+        font-weight: 600;
         margin-bottom: 1.5rem;
-        font-size: 1.5rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
     }
 
-    .chart-wrapper {
-        height: 350px;
-        position: relative;
+    .chart {
+        height: 400px;
+        background: #0f172a;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    @media (max-width: 1200px) {
+    .analysis-section {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .analysis-card {
+        background: #1e293b;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .analysis-card h3 {
+        color: #e2e8f0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .analysis-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .analysis-item {
+        padding: 1rem;
+        background: #0f172a;
+        border-radius: 0.75rem;
+        color: #94a3b8;
+        line-height: 1.5;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .tendencia {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-left: 0.5rem;
+    }
+
+    .tendencia-positiva {
+        background-color: rgba(74, 222, 128, 0.1);
+        color: #4ade80;
+    }
+
+    .tendencia-negativa {
+        background-color: rgba(248, 113, 113, 0.1);
+        color: #f87171;
+    }
+
+    .tendencia-neutra {
+        background-color: rgba(148, 163, 184, 0.1);
+        color: #94a3b8;
+    }
+
+    @media (max-width: 1024px) {
         .metrics-grid,
-        .analysis-grid {
+        .analysis-section {
             grid-template-columns: repeat(2, 1fr);
         }
     }
 
     @media (max-width: 768px) {
         .metrics-grid,
-        .analysis-grid {
+        .analysis-section {
             grid-template-columns: 1fr;
         }
-        
+
+        .container {
+            padding: 1rem;
+        }
+
         .header {
             flex-direction: column;
             gap: 1rem;
+            text-align: center;
         }
-        
-        .analysis-card {
-            height: 250px;
-        }
-    }
-
-    .insight-card {
-        background: var(--card-background);
-        padding: 2rem;
-        border-radius: 16px;
-        margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        border: 1px solid var(--border-color);
-        transition: all 0.3s ease;
-    }
-
-    .insight-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-    }
-
-    .insight-header {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .insight-icon {
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 12px;
-        font-size: 1.5rem;
-    }
-
-    .insight-icon.success {
-        background: rgba(16, 185, 129, 0.1);
-        color: #10B981;
-    }
-
-    .insight-icon.warning {
-        background: rgba(245, 158, 11, 0.1);
-        color: #F59E0B;
-    }
-
-    .insight-icon.danger {
-        background: rgba(239, 68, 68, 0.1);
-        color: #EF4444;
-    }
-
-    .insight-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        margin: 0;
-    }
-
-    .insight-content {
-        color: var(--text-secondary);
-        line-height: 1.6;
-        font-size: 1.1rem;
-    }
-
-    .metric-value {
-        font-size: 1.2rem;
-        font-weight: 600;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.05);
-        transition: all 0.3s ease;
-    }
-
-    .metric-value.success {
-        background: rgba(16, 185, 129, 0.1);
-        color: #10B981;
-    }
-
-    .metric-value.warning {
-        background: rgba(245, 158, 11, 0.1);
-        color: #F59E0B;
-    }
-
-    .metric-value.danger {
-        background: rgba(239, 68, 68, 0.1);
-        color: #EF4444;
-    }
-
-    .metric-item:hover .metric-value {
-        transform: scale(1.05);
-    }
-
-    .analysis-item {
-        position: relative;
-        padding-left: 1.5rem;
-        margin-bottom: 1rem;
-    }
-
-    .analysis-item::before {
-        content: "•";
-        position: absolute;
-        left: 0;
-        color: var(--info-color);
-        font-size: 1.5rem;
-        line-height: 1;
-    }
-
-    .trend-indicator {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.875rem;
-        font-weight: 500;
-    }
-
-    .trend-up {
-        background: rgba(16, 185, 129, 0.1);
-        color: #10B981;
-    }
-
-    .trend-down {
-        background: rgba(239, 68, 68, 0.1);
-        color: #EF4444;
-    }
-
-    .trend-neutral {
-        background: rgba(156, 163, 175, 0.1);
-        color: #9CA3AF;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="comparativo-container">
+<div class="container">
     <div class="header">
-        <h1>Análise Comparativa - {{ current_month }}</h1>
+        <h1>Análise Comparativa</h1>
         <div class="month-selector">
-            <select id="monthSelect" onchange="updateMonth()">
-                <option value="2025-03" selected>Março 2025</option>
-            </select>
-        </div>
-    </div>
-
-    <div class="insight-card">
-        <div class="insight-header">
-            <div class="insight-icon success">
-                <i class="fas fa-chart-line"></i>
-            </div>
-            <h2 class="insight-title">Visão Geral do Desempenho</h2>
-        </div>
-        <div class="insight-content">
-            <p>Análise comparativa das lojas baseada em múltiplos indicadores de desempenho. A eficiência geral é calculada considerando:</p>
-            <ul>
-                <li>Taxa de resposta (30%)</li>
-                <li>Produtos em gôndola (30%)</li>
-                <li>Produtos repostos (20%)</li>
-                <li>Redução de ruptura (20%)</li>
-            </ul>
+            <span class="current-month">{{ current_month }}</span>
         </div>
     </div>
 
     <div class="metrics-grid">
         <div class="metric-card">
-            <h3>Ranking de Eficiência Geral</h3>
+            <h2>Presença em Loja</h2>
             <div class="metric-list">
-                {% for loja in ranking_eficiencia %}
+                {% for loja in ranking_presente %}
                 <div class="metric-item">
                     <span class="store-name">{{ loja.loja.nome }}</span>
-                    <span class="metric-value {% if loja.eficiencia_geral >= 80 %}success{% elif loja.eficiencia_geral >= 60 %}warning{% else %}danger{% endif %}">
-                        {{ loja.eficiencia_geral }}%
-                    </span>
+                    <div class="metric-details">
+                        <span class="metric-value presente">{{ loja.porcentagem_presente }}%</span>
+                        {% if loja.tendencia_presente > 0 %}
+                            <span class="tendencia tendencia-positiva">↑ +{{ loja.tendencia_presente }}%</span>
+                        {% elif loja.tendencia_presente < 0 %}
+                            <span class="tendencia tendencia-negativa">↓ {{ loja.tendencia_presente }}%</span>
+                        {% else %}
+                            <span class="tendencia tendencia-neutra">= Estável</span>
+                        {% endif %}
+                    </div>
                 </div>
                 {% endfor %}
             </div>
         </div>
 
         <div class="metric-card">
-            <h3>Ranking de Produtos em Gôndola</h3>
+            <h2>Ruptura</h2>
             <div class="metric-list">
-                {% for loja in ranking_gondola %}
+                {% for loja in ranking_ruptura %}
                 <div class="metric-item">
                     <span class="store-name">{{ loja.loja.nome }}</span>
-                    <span class="metric-value {% if loja.porcentagem_gondola >= 90 %}success{% elif loja.porcentagem_gondola >= 70 %}warning{% else %}danger{% endif %}">
-                        {{ loja.porcentagem_gondola }}%
-                    </span>
+                    <div class="metric-details">
+                        <span class="metric-value ruptura">{{ loja.porcentagem_ruptura }}%</span>
+                        {% if loja.tendencia_ruptura < 0 %}
+                            <span class="tendencia tendencia-positiva">↓ {{ loja.tendencia_ruptura }}%</span>
+                        {% elif loja.tendencia_ruptura > 0 %}
+                            <span class="tendencia tendencia-negativa">↑ +{{ loja.tendencia_ruptura }}%</span>
+                        {% else %}
+                            <span class="tendencia tendencia-neutra">= Estável</span>
+                        {% endif %}
+                    </div>
                 </div>
                 {% endfor %}
             </div>
         </div>
 
         <div class="metric-card">
-            <h3>Ranking de Produtos Repostos</h3>
+            <h2>Reposição</h2>
             <div class="metric-list">
-                {% for loja in ranking_reposto %}
+                {% for loja in ranking_presente_reposto %}
                 <div class="metric-item">
                     <span class="store-name">{{ loja.loja.nome }}</span>
-                    <span class="metric-value {% if loja.porcentagem_reposto >= 80 %}success{% elif loja.porcentagem_reposto >= 60 %}warning{% else %}danger{% endif %}">
-                        {{ loja.porcentagem_reposto }}%
-                    </span>
+                    <div class="metric-details">
+                        <span class="metric-value reposicao">{{ loja.porcentagem_presente_reposto }}%</span>
+                        {% if loja.tendencia_reposicao > 0 %}
+                            <span class="tendencia tendencia-positiva">↑ +{{ loja.tendencia_reposicao }}%</span>
+                        {% elif loja.tendencia_reposicao < 0 %}
+                            <span class="tendencia tendencia-negativa">↓ {{ loja.tendencia_reposicao }}%</span>
+                        {% else %}
+                            <span class="tendencia tendencia-neutra">= Estável</span>
+                        {% endif %}
+                    </div>
                 </div>
                 {% endfor %}
-            </div>
-        </div>
-    </div>
-
-    <div class="analysis-section">
-        <h2>Análise Detalhada</h2>
-        <div class="analysis-grid">
-            <div class="analysis-card">
-                <h3>Tendências</h3>
-                <div class="analysis-list">
-                    {% for tendencia in tendencias %}
-                    <div class="analysis-item">{{ tendencia }}</div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div class="analysis-card">
-                <h3>Análise Comparativa</h3>
-                <div class="analysis-list">
-                    {% for analise in analise_comparativa %}
-                    <div class="analysis-item">{{ analise }}</div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div class="analysis-card">
-                <h3>Recomendações</h3>
-                <div class="analysis-list">
-                    {% for recomendacao in recomendacoes %}
-                    <div class="analysis-item">{{ recomendacao }}</div>
-                    {% endfor %}
-                </div>
             </div>
         </div>
     </div>
 
     <div class="chart-container">
-        <h2>Gráfico de Desempenho</h2>
-        <div class="chart-wrapper">
+        <h2>Desempenho das Lojas</h2>
+        <div class="chart">
             <canvas id="performanceChart"></canvas>
         </div>
     </div>
-</div>
-{% endblock %}
 
-{% block scripts %}
+    <div class="analysis-section">
+        <div class="analysis-card">
+            <h3>Tendências e Evolução</h3>
+            <div class="analysis-list">
+                {% for tendencia in tendencias %}
+                <div class="analysis-item">
+                    {{ tendencia }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="analysis-card">
+            <h3>Análise Comparativa</h3>
+            <div class="analysis-list">
+                {% for analise in analise_comparativa %}
+                <div class="analysis-item">
+                    {{ analise }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="analysis-card">
+            <h3>Recomendações</h3>
+            <div class="analysis-list">
+                {% for recomendacao in recomendacoes %}
+                <div class="analysis-item">
+                    {{ recomendacao }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-function updateMonth() {
-    const month = document.getElementById('monthSelect').value;
-    window.location.href = `?month=${month}`;
-}
-
-const ctx = document.getElementById('performanceChart').getContext('2d');
-const chart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: {{ lojas_nomes|safe }},
-        datasets: [
-            {
-                label: 'Produtos em Gôndola',
-                data: {{ dados_gondola|safe }},
-                backgroundColor: 'rgba(16, 185, 129, 0.7)',
-                borderColor: 'rgba(16, 185, 129, 1)',
-                borderWidth: 1
-            },
-            {
-                label: 'Produtos Repostos',
-                data: {{ dados_reposto|safe }},
-                backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                borderColor: 'rgba(59, 130, 246, 1)',
-                borderWidth: 1
-            },
-            {
-                label: 'Taxa de Ruptura',
-                data: {{ dados_ruptura|safe }},
-                backgroundColor: 'rgba(239, 68, 68, 0.7)',
-                borderColor: 'rgba(239, 68, 68, 1)',
-                borderWidth: 1
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            y: {
-                beginAtZero: true,
-                max: 100,
-                ticks: {
-                    color: '#f8fafc',
-                    font: {
-                        size: 12,
-                        weight: '600'
-                    },
-                    callback: function(value) {
-                        return value + '%';
-                    }
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ lojas_nomes|safe }},
+            datasets: [
+                {
+                    label: 'Presença em Loja',
+                    data: {{ dados_presente|safe }},
+                    backgroundColor: 'rgba(74, 222, 128, 0.7)',
+                    borderColor: 'rgba(74, 222, 128, 1)',
+                    borderWidth: 1
                 },
-                grid: {
-                    color: 'rgba(255, 255, 255, 0.1)'
-                }
-            },
-            x: {
-                ticks: {
-                    color: '#f8fafc',
-                    font: {
-                        size: 12,
-                        weight: '600'
-                    }
+                {
+                    label: 'Ruptura',
+                    data: {{ dados_ruptura|safe }},
+                    backgroundColor: 'rgba(248, 113, 113, 0.7)',
+                    borderColor: 'rgba(248, 113, 113, 1)',
+                    borderWidth: 1
                 },
-                grid: {
-                    color: 'rgba(255, 255, 255, 0.1)'
+                {
+                    label: 'Reposição',
+                    data: {{ dados_presente_reposto|safe }},
+                    backgroundColor: 'rgba(96, 165, 250, 0.7)',
+                    borderColor: 'rgba(96, 165, 250, 1)',
+                    borderWidth: 1
                 }
-            }
+            ]
         },
-        plugins: {
-            legend: {
-                position: 'top',
-                labels: {
-                    color: '#f8fafc',
-                    font: {
-                        size: 14,
-                        weight: '600'
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
                     },
-                    padding: 20
+                    ticks: {
+                        color: '#94a3b8',
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#94a3b8'
+                    }
                 }
             },
-            tooltip: {
-                backgroundColor: 'rgba(30, 41, 59, 0.9)',
-                titleColor: '#f8fafc',
-                titleFont: {
-                    size: 16,
-                    weight: '600'
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: '#e2e8f0'
+                    }
                 },
-                bodyColor: '#f8fafc',
-                bodyFont: {
-                    size: 14
-                },
-                padding: 12,
-                boxPadding: 8,
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                borderWidth: 1,
-                callbacks: {
-                    label: function(context) {
-                        return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + '%';
+                tooltip: {
+                    backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                    titleColor: '#e2e8f0',
+                    bodyColor: '#94a3b8',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.raw + '%';
+                        }
                     }
                 }
             }
-        },
-        animation: {
-            duration: 1500,
-            easing: 'easeInOutQuart'
         }
-    }
-});
+    });
 </script>
 {% endblock %} 

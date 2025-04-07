@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="header">
+        <h1>Inserir Dados Mensais</h1>
+        <p>Selecione o mês e a loja para inserir os dados</p>
+    </div>
+
+    <div class="data-form">
+        <form method="post" class="form-container">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="mes">Mês:</label>
+                <select name="mes" id="mes" required>
+                    <option value="1">Janeiro</option>
+                    <option value="2">Fevereiro</option>
+                    <option value="3">Março</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Maio</option>
+                    <option value="6">Junho</option>
+                    <option value="7">Julho</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="ano">Ano:</label>
+                <select name="ano" id="ano" required>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="loja">Loja:</label>
+                <select name="loja" id="loja" required>
+                    <option value="Arv">Arv</option>
+                    <option value="Ceara">Ceara</option>
+                    <option value="Atacale">Atacale</option>
+                    <option value="Gv">Gv</option>
+                    <option value="Leblon">Leblon</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="total_produtos">Total de Produtos:</label>
+                <input type="number" name="total_produtos" id="total_produtos" required>
+            </div>
+
+            <div class="form-group">
+                <label for="produtos_respondidos">Produtos Respondidos:</label>
+                <input type="number" name="produtos_respondidos" id="produtos_respondidos" required>
+            </div>
+
+            <div class="form-group">
+                <label for="produtos_nao_respondidos">Produtos Não Respondidos:</label>
+                <input type="number" name="produtos_nao_respondidos" id="produtos_nao_respondidos" required>
+            </div>
+
+            <div class="form-group">
+                <label for="produtos_gondola">Produtos em Gôndola:</label>
+                <input type="number" name="produtos_gondola" id="produtos_gondola" required>
+            </div>
+
+            <div class="form-group">
+                <label for="produtos_ruptura">Produtos em Ruptura:</label>
+                <input type="number" name="produtos_ruptura" id="produtos_ruptura" required>
+            </div>
+
+            <div class="form-group">
+                <label for="produtos_presente">Produtos Presentes:</label>
+                <input type="number" name="produtos_presente" id="produtos_presente" required>
+            </div>
+
+            <div class="form-group">
+                <label for="produtos_presente_reposto">Produtos Presentes Repostos:</label>
+                <input type="number" name="produtos_presente_reposto" id="produtos_presente_reposto" required>
+            </div>
+
+            <button type="submit" class="submit-btn">Inserir Dados</button>
+        </form>
+    </div>
+</div>
+
+<style>
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header h1 {
+    color: #e2e8f0;
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.header p {
+    color: #94a3b8;
+    font-size: 1.1rem;
+}
+
+.data-form {
+    background: #1e293b;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.form-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: #e2e8f0;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    color: #e2e8f0;
+    font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.submit-btn {
+    grid-column: 1 / -1;
+    background: #3b82f6;
+    color: white;
+    padding: 15px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.submit-btn:hover {
+    background: #2563eb;
+}
+
+@media (max-width: 768px) {
+    .form-container {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %} 
